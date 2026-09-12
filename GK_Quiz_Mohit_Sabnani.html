@@ -1,0 +1,207 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI GK Classroom Quiz</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+body{margin:0;background:linear-gradient(135deg,#eef2ff,#f8fafc);font-family:system-ui,'Noto Sans Devanagari',sans-serif;color:#172033}.wrap{max-width:1050px;margin:auto;padding:18px}.card{background:white;border-radius:22px;padding:22px;margin:15px 0;box-shadow:0 10px 30px #0001}h1{margin:0 0 8px}.muted{color:#667085}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;font-size:16px;background:#334155;color:#fff;cursor:pointer}.primary{background:#4f46e5}.good{background:#15803d}.hidden{display:none}.pill{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:99px;padding:7px 12px;font-weight:800;margin:4px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:700px){.grid{grid-template-columns:1fr}}.wheel{position:relative;width:300px;height:300px;border-radius:50%;margin:15px auto;border:12px solid white;box-shadow:0 8px 25px #0003;display:flex;align-items:center;justify-content:center;transition:transform 2.2s cubic-bezier(.15,.85,.2,1);overflow:visible;display:flex;align-items:center;justify-content:center;transition:transform 2.2s cubic-bezier(.15,.85,.2,1)}.wheelLabel{position:absolute;left:50%;top:50%;text-align:center;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:1}.wheelCenter{position:relative;z-index:5;background:white;border-radius:50%;width:92px;height:92px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;box-sizing:border-box;font-size:14px;font-weight:900;line-height:1.1;word-break:break-word;z-index:2}.pointer{width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid #111;margin:auto}.student{text-align:center;font-size:28px;font-weight:900}.roll{text-align:center;color:#667085}.question{font-size:28px;font-weight:850;line-height:1.4;margin:20px 0}.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:650px){.opts{grid-template-columns:1fr}.question{font-size:23px}}.opt{text-align:left;padding:15px;border:2px solid #e2e8f0;border-radius:14px;background:#f8fafc;font-size:18px;cursor:pointer}.correct{background:#dcfce7;border-color:#16a34a}.wrong{background:#fee2e2;border-color:#dc2626}.feedback{text-align:center;font-size:20px;font-weight:900;min-height:30px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}.scroll{max-height:520px;overflow:auto}
+.manualBox{margin-top:12px;padding:14px;border:1px solid #dbe2ea;border-radius:14px;background:#f8fafc}.manualRow{display:flex;gap:8px;margin-top:9px}.manualRow input{flex:1;min-width:0;padding:11px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px}.wheelCenter{background:#fff;border-radius:50%;width:92px;height:92px;display:flex;align-items:center;justify-content:center;text-align:center;padding:7px;box-sizing:border-box;font-size:13px;font-weight:900;line-height:1.1;word-break:break-word}@media(max-width:700px){.manualRow{flex-direction:column}}.studentList{margin-top:8px;max-height:180px;overflow:auto;border-radius:12px}.studentRow{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;border-bottom:1px solid #e5e7eb;background:#fff}.studentRow small{color:#667085}
+.excelHelp{
+  margin-top:10px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#f1f5ff;
+  border:1px solid #dbe3ff;
+  color:#475467;
+  font-size:14px;
+  line-height:1.55;
+}
+.excelHelp b:first-child{color:#243b8f;font-size:15px}
+.excelExample{
+  margin:6px 0;
+  padding:6px 8px;
+  background:#fff;
+  border-radius:8px;
+  font-weight:700;
+  color:#344054;
+}
+</style></head><body><div class="wrap">
+<div class="card" id="setup"><h1>🎯 GK Quiz</h1><p class="muted">Quiz Created by Mohit Sabnani</p>
+<div class="grid"><div><h3>👥 Students</h3><label class="btn primary">📁 Excel Upload<input id="file" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label>
+<div class="excelHelp">
+  <b>📌 Excel Upload Instructions</b>
+  <div>Excel में केवल <b>2 columns</b> रखें:</div>
+  <div>1️⃣ <b>Roll No.</b> &nbsp;&nbsp; 2️⃣ <b>Student Name</b></div>
+  <div class="excelExample">Example: &nbsp; 101 &nbsp; | &nbsp; Mohit</div>
+  <div>पहली row में column headings होना जरूरी है।</div>
+</div>
+<div class="manualBox">
+<b>✍️ Student Manually Add करें</b>
+<div class="manualRow">
+<input id="manualName" type="text" placeholder="Student Name">
+<input id="manualRoll" type="text" placeholder="Roll No.">
+<button type="button" class="btn" id="manualAddBtn">＋ Add</button>
+</div>
+<div id="manualMsg" class="muted">नाम और Roll No. भरकर Add दबाएँ।</div>
+</div>
+<p id="count" class="pill">0 / 177</p>
+<div id="studentList" class="studentList"></div>
+<p id="preview" class="muted"></p></div>
+<div><h3>⚙️ Settings</h3><label>Question time: <input id="secs" type="number" value="30" min="5" max="180" style="width:70px;padding:7px"></label><p class="muted">Built-in 177 medium-level Hindi GK questions. Students जितने, questions उतने.</p><button class="btn good" onclick="start()">🚀 Start Quiz</button></div></div></div>
+<div class="card hidden" id="game"><div><span class="pill" id="round"></span><span class="pill" id="timer"></span><span class="pill">Total Score: <b id="score">0</b></span></div>
+<div id="spinStage"><div class="pointer"></div><div class="wheel" id="wheel"><div class="wheelCenter" id="wheelCenter">SPIN</div></div><div class="student" id="stu">🎡 Spin to select student</div><div class="roll" id="roll"></div><p style="text-align:center"><button class="btn primary" id="spin" onclick="spin()">🎡 SPIN</button></p></div>
+<div id="qstage" class="hidden"><div class="question" id="q"></div><div class="opts" id="opts"></div><div class="feedback" id="fb"></div><p style="text-align:center"><button class="btn good hidden" id="next" onclick="next()">🎡 Spin for Next Question</button></p></div></div>
+<div class="card hidden" id="result"><h1>🏆 Final Rank Card</h1><p id="sum" class="muted"></p><div class="scroll"><table><thead><tr><th>Rank</th><th>Student</th><th>Roll No.</th><th>Score</th><th>Correct</th><th>Wrong</th></tr></thead><tbody id="body"></tbody></table></div><p><button class="btn primary" onclick="location.reload()">🔄 New Quiz</button></p></div>
+</div>
+<script>
+const BANK=[["सांभर झील किस राज्य में है?", ["राजस्थान", "गुजरात", "मध्य प्रदेश", "हरियाणा"], 0], ["सिरके में कौन-सा अम्ल होता है?", ["एसीटिक अम्ल", "लैक्टिक अम्ल", "सिट्रिक अम्ल", "सल्फ्यूरिक अम्ल"], 0], ["फ्रांस की राजधानी क्या है?", ["पेरिस", "ल्यों", "मार्सेई", "नीस"], 0], ["गुर्दे की कार्यात्मक इकाई क्या है?", ["नेफ्रॉन", "न्यूरॉन", "विल्ली", "एल्वियोलस"], 0], ["AI उत्तर को महत्वपूर्ण निर्णय से पहले क्या करना चाहिए?", ["विश्वसनीय स्रोत से सत्यापन", "बिना जाँचे मानना", "पासवर्ड साझा करना", "डेटा मिटाना"], 0], ["धान मुख्यतः किस ऋतु की फसल है?", ["खरीफ", "रबी", "जायद", "शीतकालीन"], 0], ["वॉलीबॉल में एक टीम के कितने खिलाड़ी कोर्ट पर होते हैं?", ["6", "5", "7", "8"], 0], ["तमिलनाडु की राजधानी क्या है?", ["चेन्नई", "मदुरै", "कोयंबटूर", "सलेम"], 0], ["भूटान की राजधानी क्या है?", ["थिम्फू", "पारो", "पुनाखा", "फुंटशोलिंग"], 0], ["विद्युत धारा की SI इकाई क्या है?", ["एम्पियर", "वोल्ट", "ओम", "वाट"], 0], ["AI का पूरा नाम क्या है?", ["Artificial Intelligence", "Automatic Internet", "Advanced Input", "Applied Information"], 0], ["कोशिका का नियंत्रण केंद्र क्या है?", ["नाभिक", "माइटोकॉन्ड्रिया", "वैक्यूल", "गोल्जी तंत्र"], 0], ["‘भारत कोकिला’ किसे कहा जाता है?", ["सरोजिनी नायडू", "लता मंगेशकर", "इंदिरा गांधी", "विजयलक्ष्मी पंडित"], 0], ["महासागरों की सामान्यतः कितनी संख्या मानी जाती है?", ["5", "3", "4", "7"], 0], ["दादा साहेब फाल्के पुरस्कार किस क्षेत्र का है?", ["सिनेमा", "खेल", "विज्ञान", "साहित्य"], 0], ["गोदावरी को किस नाम से भी जाना जाता है?", ["दक्षिण गंगा", "उत्तर गंगा", "पश्चिम गंगा", "पूर्व गंगा"], 0], ["भारत का पहला उपग्रह कौन-सा था?", ["आर्यभट्ट", "भास्कर", "रोहिणी", "इनसैट-1A"], 0], ["ज्ञानपीठ पुरस्कार किस क्षेत्र का है?", ["साहित्य", "खेल", "विज्ञान", "सिनेमा"], 0], ["टीकाकरण का मुख्य उद्देश्य क्या है?", ["प्रतिरक्षा विकसित करना", "रक्तचाप बढ़ाना", "पाचन सुधारना", "ऊँचाई बढ़ाना"], 0], ["दो-स्तरीय प्रमाणीकरण का उद्देश्य क्या है?", ["खाते की सुरक्षा बढ़ाना", "इंटरनेट तेज करना", "पासवर्ड हटाना", "बैटरी बढ़ाना"], 0], ["भारत का पहला आम चुनाव कब हुआ?", ["1951-52", "1947-48", "1955-56", "1960-61"], 0], ["pH 7 किस विलयन को दर्शाता है?", ["उदासीन", "अम्लीय", "क्षारीय", "लवणीय"], 0], ["दलहनी फसलों की जड़ों में कौन-से बैक्टीरिया नाइट्रोजन स्थिरीकरण करते हैं?", ["राइजोबियम", "प्लास्मोडियम", "ई. कोलाई", "लैक्टोबैसिलस"], 0], ["USB का पूरा नाम क्या है?", ["Universal Serial Bus", "United System Board", "Universal Service Box", "User Serial Base"], 0], ["राजस्थान की राजधानी क्या है?", ["जयपुर", "जोधपुर", "अजमेर", "उदयपुर"], 0], ["प्रतिरोध की SI इकाई क्या है?", ["ओम", "वाट", "जूल", "वोल्ट"], 0], ["क्षेत्रफल की दृष्टि से विश्व का सबसे बड़ा देश कौन-सा है?", ["रूस", "कनाडा", "चीन", "अमेरिका"], 0], ["‘लौह पुरुष’ किसे कहा जाता है?", ["सरदार वल्लभभाई पटेल", "सुभाष चंद्र बोस", "भगत सिंह", "राजेंद्र प्रसाद"], 0], ["गांधी जयंती कब मनाई जाती है?", ["2 अक्टूबर", "5 सितंबर", "14 नवंबर", "26 जनवरी"], 0], ["क्लाउड स्टोरेज का अर्थ क्या है?", ["इंटरनेट आधारित सर्वर पर डेटा रखना", "केवल पेन ड्राइव", "कागज पर डेटा", "डेटा मिटाना"], 0], ["गेहूँ मुख्यतः किस ऋतु की फसल है?", ["रबी", "खरीफ", "जायद", "बहुवर्षीय"], 0], ["असहयोग आंदोलन किस वर्ष शुरू हुआ?", ["1920", "1915", "1930", "1942"], 0], ["मध्य प्रदेश की राजधानी क्या है?", ["भोपाल", "इंदौर", "ग्वालियर", "जबलपुर"], 0], ["भारत का मानक समय किस देशांतर पर आधारित है?", ["82°30′ पूर्व", "75° पूर्व", "90° पूर्व", "68° पूर्व"], 0], ["संयुक्त राष्ट्र का मुख्यालय कहाँ है?", ["न्यूयॉर्क", "जिनेवा", "पेरिस", "वॉशिंगटन"], 0], ["GST का पूरा नाम क्या है?", ["Goods and Services Tax", "General Sales Tax", "Government Service Tax", "Goods Supply Tariff"], 0], ["थार मरुस्थल मुख्यतः किस राज्य में है?", ["राजस्थान", "महाराष्ट्र", "बिहार", "ओडिशा"], 0], ["प्रोजेक्ट एलिफेंट किससे संबंधित है?", ["हाथी संरक्षण", "बाघ संरक्षण", "गैंडा संरक्षण", "मोर संरक्षण"], 0], ["संतोष ट्रॉफी किस खेल से संबंधित है?", ["फुटबॉल", "क्रिकेट", "हॉकी", "कबड्डी"], 0], ["पाई का लगभग मान क्या है?", ["3.14", "2.14", "4.13", "3.41"], 0], ["GPS का पूरा नाम क्या है?", ["Global Positioning System", "General Position Service", "Global Postal System", "Geographic Power System"], 0], ["जैव विविधता का अर्थ क्या है?", ["जीवों की विविधता", "केवल पौधों की संख्या", "केवल पशुओं की संख्या", "मिट्टी के प्रकार"], 0], ["कर्नाटक की राजधानी क्या है?", ["बेंगलुरु", "मैसूर", "हुबली", "मंगलुरु"], 0], ["भारत में श्वेत क्रांति किससे संबंधित है?", ["दूध", "गेहूँ", "मछली", "तेल"], 0], ["राजस्थान का राज्य पक्षी कौन-सा है?", ["गोडावण", "मोर", "सारस", "कबूतर"], 0], ["पानी में पेंसिल टेढ़ी क्यों दिखती है?", ["अपवर्तन के कारण", "परावर्तन के कारण", "विक्षेपण के कारण", "ध्वनि के कारण"], 0], ["भारत का राष्ट्रीय जलीय जीव कौन-सा है?", ["गंगा डॉल्फिन", "मगरमच्छ", "कछुआ", "व्हेल"], 0], ["भारत के प्रथम उपराष्ट्रपति कौन थे?", ["डॉ. सर्वपल्ली राधाकृष्णन", "राजेंद्र प्रसाद", "जाकिर हुसैन", "वी. वी. गिरि"], 0], ["लोहे पर जंग लगने के लिए क्या आवश्यक है?", ["ऑक्सीजन और नमी", "केवल धूप", "केवल CO₂", "केवल नमक"], 0], ["प्रकाश की चाल निर्वात में लगभग कितनी है?", ["3×10⁸ m/s", "3×10⁶ m/s", "3×10¹⁰ m/s", "3×10⁴ m/s"], 0], ["तंत्रिका कोशिका क्या कहलाती है?", ["न्यूरॉन", "नेफ्रॉन", "प्लेटलेट", "विल्ली"], 0], ["पित्त का भंडारण कहाँ होता है?", ["पित्ताशय", "पेट", "यकृत", "छोटी आंत"], 0], ["चैटबॉट का मुख्य उद्देश्य क्या है?", ["बातचीत के माध्यम से जानकारी/सहायता देना", "केवल चित्र बनाना", "केवल गणना करना", "केवल फाइल हटाना"], 0], ["इंद्रधनुष में कितने रंग माने जाते हैं?", ["7", "5", "6", "8"], 0], ["शिक्षा का अधिकार किस अनुच्छेद से जुड़ा है?", ["21A", "14", "19", "32"], 0], ["बिहार की राजधानी क्या है?", ["पटना", "गया", "भागलपुर", "मुजफ्फरपुर"], 0], ["बल की SI इकाई क्या है?", ["न्यूटन", "जूल", "वाट", "पास्कल"], 0], ["डेंगू का प्रमुख वाहक कौन है?", ["एडीज मच्छर", "एनोफिलीज", "क्यूलेक्स", "ट्सेट्से"], 0], ["ऋतुओं का मुख्य कारण क्या है?", ["पृथ्वी की धुरी का झुकाव और परिक्रमण", "केवल घूर्णन", "चंद्रमा", "ज्वार"], 0], ["HTTPS में S किसका संकेत है?", ["Secure", "Search", "System", "Server"], 0], ["भारत के प्रथम राष्ट्रपति कौन थे?", ["डॉ. राजेंद्र प्रसाद", "राधाकृष्णन", "नेहरू", "सरदार पटेल"], 0], ["ऊर्जा की SI इकाई क्या है?", ["जूल", "न्यूटन", "वाट", "एम्पियर"], 0], ["विश्व पृथ्वी दिवस कब है?", ["22 अप्रैल", "22 मार्च", "5 जून", "21 मार्च"], 0], ["गुरुत्वाकर्षण का नियम किससे संबंधित है?", ["न्यूटन", "आइंस्टीन", "गैलीलियो", "फैराडे"], 0], ["स्प्रिंकलर सिंचाई में पानी कैसे दिया जाता है?", ["फुहार के रूप में", "बूंद-बूंद केवल जड़ों में", "नदी में", "केवल भूमिगत"], 0], ["मनुष्य में सामान्यतः कितने गुणसूत्र होते हैं?", ["46", "44", "48", "23"], 0], ["मौलिक कर्तव्य किस संशोधन से जोड़े गए?", ["42वाँ", "44वाँ", "52वाँ", "61वाँ"], 0], ["विश्व का सबसे बड़ा महासागर कौन-सा है?", ["प्रशांत महासागर", "अटलांटिक", "हिंद", "आर्कटिक"], 0], ["नर्मदा नदी किस दिशा में बहती है?", ["पश्चिम", "पूर्व", "उत्तर", "दक्षिण"], 0], ["कनाडा की राजधानी क्या है?", ["ओटावा", "टोरंटो", "वैंकूवर", "मॉन्ट्रियल"], 0], ["मजबूत पासवर्ड में क्या होना चाहिए?", ["अलग अक्षर, अंक और विशेष चिन्ह", "केवल नाम", "केवल जन्मतिथि", "123456"], 0], ["राष्ट्रीय मतदाता दिवस कब मनाया जाता है?", ["25 जनवरी", "26 जनवरी", "24 अक्टूबर", "1 मई"], 0], ["ब्रह्मपुत्र तिब्बत में किस नाम से जानी जाती है?", ["सांगपो", "सतलुज", "इरावदी", "मेकांग"], 0], ["भारत में चुनाव कौन कराता है?", ["निर्वाचन आयोग", "UPSC", "वित्त आयोग", "नीति आयोग"], 0], ["NPK में P किसे दर्शाता है?", ["फॉस्फोरस", "पोटैशियम", "निकेल", "पारा"], 0], ["बाल दिवस भारत में कब मनाया जाता है?", ["14 नवंबर", "20 नवंबर", "5 सितंबर", "15 अगस्त"], 0], ["कान्हा राष्ट्रीय उद्यान किस राज्य में है?", ["मध्य प्रदेश", "राजस्थान", "गुजरात", "महाराष्ट्र"], 0], ["विश्व का सबसे छोटा देश कौन-सा है?", ["वेटिकन सिटी", "मोनाको", "सैन मैरिनो", "मालदीव"], 0], ["कार्बन डाइऑक्साइड बढ़ने से किस समस्या में योगदान होता है?", ["वैश्विक तापन", "भूकंप", "ज्वालामुखी", "ग्रहण"], 0], ["‘तुम मुझे खून दो…’ किससे जुड़ा है?", ["सुभाष चंद्र बोस", "भगत सिंह", "चंद्रशेखर आजाद", "लाला लाजपत राय"], 0], ["1983 विश्व कप में भारत के कप्तान कौन थे?", ["कपिल देव", "सुनील गावस्कर", "अजहरुद्दीन", "रवि शास्त्री"], 0], ["भारत का राष्ट्रीय पशु कौन-सा है?", ["बाघ", "सिंह", "हाथी", "गैंडा"], 0], ["राष्ट्रीय गणित दिवस कब मनाया जाता है?", ["22 दिसंबर", "28 फरवरी", "14 नवंबर", "5 सितंबर"], 0], ["CPU में ALU किस प्रकार के कार्य करता है?", ["अंकगणितीय और तार्किक", "केवल चित्र", "केवल आवाज", "केवल प्रिंटिंग"], 0], ["‘सारे जहाँ से अच्छा’ के रचयिता कौन हैं?", ["मुहम्मद इकबाल", "टैगोर", "बंकिमचंद्र", "मैथिलीशरण गुप्त"], 0], ["क्विज में टाइमर का एक लाभ क्या है?", ["समय प्रबंधन और प्रतिस्पर्धा बढ़ाना", "सभी उत्तर सही करना", "प्रश्न हटाना", "स्कोर बंद करना"], 0], ["वायुमंडल में सर्वाधिक गैस कौन-सी है?", ["नाइट्रोजन", "ऑक्सीजन", "कार्बन डाइऑक्साइड", "हाइड्रोजन"], 0], ["पौधों में जल का परिवहन किस ऊतक से होता है?", ["जाइलम", "फ्लोएम", "कैंबियम", "मेरिस्टेम"], 0], ["ओडिशा की राजधानी क्या है?", ["भुवनेश्वर", "कटक", "पुरी", "राउरकेला"], 0], ["भूमध्य रेखा पृथ्वी को किन गोलार्धों में बाँटती है?", ["उत्तरी और दक्षिणी", "पूर्वी और पश्चिमी", "एशिया और यूरोप", "भूमि और जल"], 0], ["यूरिया मुख्यतः किस पोषक तत्व का स्रोत है?", ["नाइट्रोजन", "फॉस्फोरस", "पोटैशियम", "कैल्शियम"], 0], ["केरल की राजधानी क्या है?", ["तिरुवनंतपुरम", "कोच्चि", "कन्नूर", "कोझिकोड"], 0], ["शतरंज में प्रत्येक खिलाड़ी के पास शुरुआत में कितने मोहरे होते हैं?", ["16", "12", "20", "32"], 0], ["विश्व का सबसे ऊँचा पर्वत कौन-सा है?", ["माउंट एवरेस्ट", "K2", "कंचनजंगा", "नंदा देवी"], 0], ["नोबेल शांति पुरस्कार किस शहर में दिया जाता है?", ["ओस्लो", "स्टॉकहोम", "जिनेवा", "पेरिस"], 0], ["DRDO मुख्यतः किस क्षेत्र से जुड़ा है?", ["रक्षा अनुसंधान", "कृषि", "अंतरिक्ष", "बैंकिंग"], 0], ["WHO का मुख्यालय कहाँ है?", ["जिनेवा", "न्यूयॉर्क", "पेरिस", "लंदन"], 0], ["अंतरिक्ष में जाने वाले पहले भारतीय कौन थे?", ["राकेश शर्मा", "कल्पना चावला", "विक्रम साराभाई", "सुनीता विलियम्स"], 0], ["सहारा मरुस्थल किस महाद्वीप में है?", ["अफ्रीका", "एशिया", "ऑस्ट्रेलिया", "दक्षिण अमेरिका"], 0], ["वृक्षारोपण मृदा अपरदन कैसे कम करता है?", ["जड़ें मिट्टी को बाँधती हैं", "पेड़ मिट्टी हटाते हैं", "पेड़ पानी सुखाते हैं", "पेड़ हवा रोकते नहीं"], 0], ["लक्षद्वीप किस समुद्र में है?", ["अरब सागर", "बंगाल की खाड़ी", "लाल सागर", "कैस्पियन सागर"], 0], ["विटामिन D की कमी से कौन-सा रोग हो सकता है?", ["रिकेट्स", "स्कर्वी", "बेरी-बेरी", "रतौंधी"], 0], ["भारत का राष्ट्रीय पक्षी कौन-सा है?", ["मोर", "हंस", "तोता", "गरुड़"], 0], ["सर्च इंजन का उदाहरण क्या है?", ["Google", "Windows", "Linux", "Bluetooth"], 0], ["क्विज के अंत में रैंक कार्ड का उद्देश्य क्या है?", ["प्रदर्शन का सारांश दिखाना", "प्रश्न बनाना", "आवाज रिकॉर्ड करना", "Excel हटाना"], 0], ["हिंदी दिवस कब मनाया जाता है?", ["14 सितंबर", "10 जनवरी", "21 फरवरी", "26 नवंबर"], 0], ["ओलंपिक में भारत का पहला व्यक्तिगत स्वर्ण किसने जीता?", ["अभिनव बिंद्रा", "नीरज चोपड़ा", "सुशील कुमार", "राज्यवर्धन सिंह राठौड़"], 0], ["त्रिभुज के कोणों का योग कितना होता है?", ["180°", "90°", "270°", "360°"], 0], ["सुंदरबन राष्ट्रीय उद्यान किस राज्य में है?", ["पश्चिम बंगाल", "ओडिशा", "असम", "बिहार"], 0], ["राजस्थान का राज्य वृक्ष कौन-सा है?", ["खेजड़ी", "नीम", "बरगद", "रोहिड़ा"], 0], ["डेटा बैकअप क्यों किया जाता है?", ["डेटा खोने पर पुनः प्राप्त करने के लिए", "इंटरनेट बंद करने के लिए", "फाइल रंग बदलने के लिए", "कंप्यूटर गर्म करने के लिए"], 0], ["RBI की स्थापना किस वर्ष हुई?", ["1935", "1930", "1947", "1950"], 0], ["‘ब्लू सिटी’ किसे कहा जाता है?", ["जोधपुर", "जयपुर", "उदयपुर", "बीकानेर"], 0], ["ब्राज़ील की राजधानी क्या है?", ["ब्रासीलिया", "रियो", "साओ पाउलो", "सल्वाडोर"], 0], ["हल्दीघाटी का युद्ध किनके बीच हुआ?", ["महाराणा प्रताप और मुगल सेना", "अकबर और शिवाजी", "बाबर और राणा सांगा", "पृथ्वीराज और गौरी"], 0], ["फसल चक्र का एक लाभ क्या है?", ["मिट्टी की उर्वरता बनाए रखने में मदद", "कीट बढ़ाना", "पानी बढ़ाना", "फसल घटाना"], 0], ["किस ग्रह के प्रमुख वलय हैं?", ["शनि", "मंगल", "शुक्र", "बुध"], 0], ["विश्व ओजोन दिवस कब है?", ["16 सितंबर", "5 जून", "22 अप्रैल", "24 अक्टूबर"], 0], ["WWW का पूरा नाम क्या है?", ["World Wide Web", "World Web Window", "Wide World Web", "Web World Wide"], 0], ["अमेजन नदी किस महाद्वीप में बहती है?", ["दक्षिण अमेरिका", "अफ्रीका", "एशिया", "उत्तरी अमेरिका"], 0], ["दिलवाड़ा मंदिर कहाँ हैं?", ["माउंट आबू", "पुष्कर", "नाथद्वारा", "चित्तौड़गढ़"], 0], ["राष्ट्रीय खेल दिवस किसकी जयंती पर है?", ["मेजर ध्यानचंद", "मिल्खा सिंह", "कपिल देव", "नीरज चोपड़ा"], 0], ["चेचक के टीके के विकास का श्रेय किसे है?", ["एडवर्ड जेनर", "फ्लेमिंग", "पाश्चर", "कोच"], 0], ["भारत का राष्ट्रीय वृक्ष कौन-सा है?", ["बरगद", "नीम", "पीपल", "आम"], 0], ["भोजन का अधिकांश अवशोषण कहाँ होता है?", ["छोटी आंत", "बड़ी आंत", "पेट", "ग्रासनली"], 0], ["अंतरराष्ट्रीय महिला दिवस कब मनाया जाता है?", ["8 मार्च", "1 मई", "21 जून", "10 दिसंबर"], 0], ["अंडमान-निकोबार किस खाड़ी में स्थित है?", ["बंगाल की खाड़ी", "अरब सागर", "कच्छ की खाड़ी", "मन्नार की खाड़ी"], 0], ["बेकिंग सोडा का रासायनिक नाम क्या है?", ["सोडियम बाइकार्बोनेट", "सोडियम क्लोराइड", "कैल्शियम कार्बोनेट", "पोटैशियम नाइट्रेट"], 0], ["दांडी मार्च किस आंदोलन से संबंधित था?", ["नमक सत्याग्रह", "भारत छोड़ो", "असहयोग", "स्वदेशी"], 0], ["भारत का राष्ट्रीय पुष्प कौन-सा है?", ["कमल", "गुलाब", "गेंदा", "चमेली"], 0], ["सिक्किम की राजधानी क्या है?", ["गंगटोक", "पेलिंग", "नामची", "लाचेन"], 0], ["मानव शरीर की सबसे बड़ी ग्रंथि कौन-सी है?", ["यकृत", "अग्न्याशय", "थायरॉइड", "पिट्यूटरी"], 0], ["पाकिस्तान की राजधानी क्या है?", ["इस्लामाबाद", "कराची", "लाहौर", "पेशावर"], 0], ["बांग्लादेश की राजधानी क्या है?", ["ढाका", "चटगाँव", "सिलहट", "राजशाही"], 0], ["मृदा अपरदन का अर्थ क्या है?", ["ऊपरी मिट्टी का हटना", "मिट्टी का जमना", "बीज डालना", "मिट्टी का रंग बदलना"], 0], ["गंगा की मुख्य धारा भागीरथी का उद्गम किस हिमनद से है?", ["गंगोत्री", "यमुनोत्री", "सियाचिन", "मिलम"], 0], ["राष्ट्रीय प्रतीक किस स्थान के सिंह स्तंभ से लिया गया है?", ["सारनाथ", "सांची", "नालंदा", "अमरावती"], 0], ["हवा महल किस शहर में है?", ["जयपुर", "उदयपुर", "जोधपुर", "अजमेर"], 0], ["एथलेटिक्स में भारत का पहला ओलंपिक स्वर्ण किसने जीता?", ["नीरज चोपड़ा", "अभिनव बिंद्रा", "मिल्खा सिंह", "पी. टी. उषा"], 0], ["नीली क्रांति किससे संबंधित है?", ["मत्स्य उत्पादन", "दूध", "गेहूँ", "तेल"], 0], ["महाराष्ट्र की राजधानी क्या है?", ["मुंबई", "पुणे", "नागपुर", "नासिक"], 0], ["क्विज में MCQ का पूरा नाम क्या है?", ["Multiple Choice Question", "Main Computer Quiz", "Multiple Correct Query", "Manual Choice Quiz"], 0], ["सरिस्का टाइगर रिजर्व किस जिले में है?", ["अलवर", "भरतपुर", "अजमेर", "बूंदी"], 0], ["‘रमन प्रभाव’ किससे संबंधित है?", ["प्रकाश के प्रकीर्णन से", "गुरुत्वाकर्षण से", "ध्वनि से", "विद्युत से"], 0], ["संयुक्त राष्ट्र की स्थापना किस वर्ष हुई?", ["1945", "1919", "1950", "1965"], 0], ["विटामिन C की कमी से कौन-सा रोग होता है?", ["स्कर्वी", "रिकेट्स", "बेरी-बेरी", "एनीमिया"], 0], ["नवीकरणीय ऊर्जा का उदाहरण क्या है?", ["सौर ऊर्जा", "कोयला", "पेट्रोलियम", "प्राकृतिक गैस"], 0], ["सौरमंडल का सबसे बड़ा ग्रह कौन-सा है?", ["बृहस्पति", "शनि", "पृथ्वी", "यूरेनस"], 0], ["क्रिकेट में एक ओवर में कितनी वैध गेंदें होती हैं?", ["6", "5", "7", "8"], 0], ["मतदान की न्यूनतम आयु कितनी है?", ["18 वर्ष", "16 वर्ष", "21 वर्ष", "25 वर्ष"], 0], ["DNA का पूरा नाम क्या है?", ["डीऑक्सीराइबोन्यूक्लिक अम्ल", "राइबोन्यूक्लिक अम्ल", "डाइनाइट्रोजन अम्ल", "डायऑक्सी न्यूक्लिक अम्ल"], 0], ["पुष्कर किस जिले में है?", ["अजमेर", "जयपुर", "पाली", "नागौर"], 0], ["जर्मनी की राजधानी क्या है?", ["बर्लिन", "म्यूनिख", "फ्रैंकफर्ट", "हैम्बर्ग"], 0], ["इंसुलिन किस अंग से बनता है?", ["अग्न्याशय", "यकृत", "गुर्दा", "हृदय"], 0], ["भारतीय संविधान के प्रारूप समिति के अध्यक्ष कौन थे?", ["डॉ. बी. आर. आंबेडकर", "राजेंद्र प्रसाद", "नेहरू", "सरदार पटेल"], 0], ["ऑक्सीजन का परिवहन कौन करता है?", ["हीमोग्लोबिन", "इंसुलिन", "पित्त", "प्लाज्मा"], 0], ["थॉमस कप किस खेल से संबंधित है?", ["बैडमिंटन", "टेनिस", "हॉकी", "क्रिकेट"], 0], ["भारत की राजधानी क्या है?", ["नई दिल्ली", "मुंबई", "कोलकाता", "चेन्नई"], 0], ["भारत की पहली रेलगाड़ी किन स्थानों के बीच चली?", ["मुंबई और ठाणे", "दिल्ली और आगरा", "कोलकाता और हावड़ा", "चेन्नई और बेंगलुरु"], 0], ["ऑपरेशन फ्लड किससे संबंधित था?", ["दूध उत्पादन", "गेहूँ", "मछली", "तेल"], 0], ["स्प्रेडशीट में सूत्र सामान्यतः किस चिन्ह से शुरू होता है?", ["=", "#", "@", "&"], 0], ["राजस्थान दिवस कब मनाया जाता है?", ["30 मार्च", "1 नवंबर", "15 अगस्त", "26 जनवरी"], 0], ["फुटबॉल की एक टीम में मैदान पर कितने खिलाड़ी होते हैं?", ["11", "9", "10", "12"], 0], ["हल्दीघाटी का युद्ध किस वर्ष हुआ?", ["1576", "1526", "1605", "1658"], 0], ["फिशिंग क्या है?", ["धोखे से संवेदनशील जानकारी हासिल करने का प्रयास", "मछली पालन", "कंप्यूटर सफाई", "फाइल प्रिंट"], 0], ["काजीरंगा राष्ट्रीय उद्यान किस राज्य में है?", ["असम", "केरल", "गुजरात", "मध्य प्रदेश"], 0], ["चीन की राजधानी क्या है?", ["बीजिंग", "शंघाई", "ग्वांगझोउ", "शेनझेन"], 0], ["उत्तर प्रदेश की राजधानी क्या है?", ["लखनऊ", "कानपुर", "आगरा", "वाराणसी"], 0], ["विटामिन B1 की कमी से कौन-सा रोग होता है?", ["बेरी-बेरी", "स्कर्वी", "रिकेट्स", "रतौंधी"], 0], ["राष्ट्रीय युवा दिवस कब मनाया जाता है?", ["12 जनवरी", "15 जनवरी", "26 जनवरी", "5 सितंबर"], 0], ["पहले आम चुनाव के मुख्य निर्वाचन आयुक्त कौन थे?", ["सुकुमार सेन", "टी. एन. शेषन", "एस. वाई. कुरैशी", "राजीव कुमार"], 0], ["NITI Aayog ने किस संस्था का स्थान लिया?", ["योजना आयोग", "वित्त आयोग", "UPSC", "SEBI"], 0], ["RAM किस प्रकार की मेमोरी है?", ["वोलाटाइल/अस्थायी", "स्थायी", "केवल बाहरी", "कागजी"], 0], ["किसान मिट्टी की जाँच क्यों कराते हैं?", ["उपयुक्त पोषक तत्व/उर्वरक तय करने के लिए", "रंग बदलने के लिए", "फसल बेचने के लिए", "पानी मीठा करने के लिए"], 0], ["भारत छोड़ो आंदोलन किस वर्ष शुरू हुआ?", ["1942", "1930", "1947", "1920"], 0], ["साइलो का उपयोग किसके भंडारण के लिए होता है?", ["अनाज", "पेट्रोल", "कपड़ा", "धातु"], 0], ["प्रोटीन संश्लेषण में कौन-सा कोशिकांग प्रमुख है?", ["राइबोसोम", "लाइसोसोम", "वैक्यूल", "क्लोरोप्लास्ट"], 0]];let S=[],used=[],idx=0,cur=null,rec={},rot=0,timer,tl,answered=false;
+let currentQuestion=null;
+const $=id=>document.getElementById(id);
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+$('manualAddBtn').addEventListener('click',manual);
+$('manualName').addEventListener('keydown',e=>{if(e.key==='Enter')manual()});
+$('manualRoll').addEventListener('keydown',e=>{if(e.key==='Enter')manual()});
+function upd(){
+ $('count').textContent=S.length+' / 177';
+ $('preview').textContent=S.length?'Added students:':'';
+ $('studentList').innerHTML=S.map((x,i)=>'<div class="studentRow"><span>'+String(i+1)+'. '+escapeHtml(x.name)+'</span><small>Roll No. '+escapeHtml(x.roll)+'</small></div>').join('');
+}
+$('file').onchange=async e=>{let f=e.target.files[0];if(!f)return;let d=await f.arrayBuffer(),w=XLSX.read(d),r=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1,defval:''});S=[];r.forEach((x,i)=>{let a=String(x[0]??'').trim(),b=String(x[1]??'').trim();if(i==0&&/roll|क्रम|no/i.test(a)&&/name|नाम/i.test(b))return;if(!a&&!b)return;if(!b){b=a;a=i+1}S.push({roll:a,name:b})});S=S.slice(0,177);upd();if(r.length-1>177)alert('Maximum 177 students allowed.')};
+function manual(){
+if(S.length>=177)return alert('Maximum 177 students allowed.');
+const n=$('manualName').value.trim();
+let r=$('manualRoll').value.trim();
+if(!n){$('manualMsg').textContent='⚠️ Student Name भरें।';$('manualName').focus();return;}
+if(!r)r=String(S.length+1);
+if(S.some(x=>String(x.roll)===String(r))){$('manualMsg').textContent='⚠️ यह Roll No. पहले से मौजूद है।';$('manualRoll').focus();return;}
+S.push({name:n,roll:r});$('manualName').value='';$('manualRoll').value='';
+$('manualMsg').textContent='✅ '+n+' successfully add हो गया।';upd();
+}
+function start(){if(!S.length)return alert('पहले Excel upload या student add करें.');S=S.slice(0,177);S.forEach(x=>rec[x.name+'|'+x.roll]={...x,score:0,correct:0,wrong:0});$('setup').classList.add('hidden');$('game').classList.remove('hidden');showSpin()}
+function renderWheel(){
+  const rem=S.filter(x=>!used.includes(x.roll+'|'+x.name));
+  const w=$('wheel'), n=rem.length;
+  if(!n){w.innerHTML='<div class="wheelCenter">DONE</div>';return;}
+  const colors=[];
+  for(let i=0;i<n;i++) colors.push('hsl('+(i*360/n)+',75%,55%)');
+  w.style.background='conic-gradient('+colors.map((c,i)=>c+' '+(i*100/n)+'% '+((i+1)*100/n)+'%').join(',')+')';
+  w.innerHTML='<div class="wheelCenter" id="wheelCenter">SPIN</div>';
+  const font=n>60?7:n>30?8:n>15?9:11;
+  rem.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='wheelLabel';
+    el.textContent=s.name;
+    el.title=s.name+' • Roll No. '+s.roll;
+    el.style.width=(n>40?62:n>20?78:100)+'px';
+    el.style.fontSize=font+'px';
+    const angle=i*360/n+180/n;
+    const radius=n>40?120:n>20?110:100;
+    el.style.transform='translate(-50%,-50%) rotate('+angle+'deg) translateY(-'+radius+'px) rotate(-'+angle+'deg)';
+    w.appendChild(el);
+  });
+}
+function showSpin(){
+  $('round').textContent='Round '+(idx+1)+' / '+S.length;
+  $('spinStage').classList.remove('hidden');
+  $('qstage').classList.add('hidden');
+  $('spin').disabled=false;
+  $('stu').textContent='🎡 Spin to select student';
+  $('roll').textContent='';
+  renderWheel();
+}
+function spin(){
+  const rem=S.filter(x=>!used.includes(x.roll+'|'+x.name));
+  if(!rem.length){alert('सभी students का turn हो चुका है।');return;}
+  $('spin').disabled=true;
+
+  const winnerIndex=Math.floor(Math.random()*rem.length);
+  cur=rem[winnerIndex];
+  const n=rem.length;
+  const segmentCenter=winnerIndex*360/n+180/n;
+  rot += 1440 + (360-segmentCenter) - (rot%360);
+  $('wheel').style.transform='rotate('+rot+'deg)';
+
+  let ticks=0;
+  clearInterval(window.spinNameTimer);
+  window.spinNameTimer=setInterval(()=>{
+    const s=rem[Math.floor(Math.random()*rem.length)];
+    $('wheelCenter').textContent=s.name;
+    $('stu').textContent='👤 '+s.name;
+    $('roll').textContent='Roll No. '+s.roll;
+    ticks++;
+    if(ticks>=25){
+      clearInterval(window.spinNameTimer);
+      $('wheelCenter').textContent=cur.name;
+      $('stu').textContent='👤 '+cur.name;
+      $('roll').textContent='Roll No. '+cur.roll;
+      used.push(cur.roll+'|'+cur.name);
+      setTimeout(showQ,700);
+    }
+  },80);
+}
+function voice(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='hi-IN';u.rate=.9;speechSynthesis.speak(u)}
+function showQ(){
+  let x=BANK[idx%BANK.length];
+  answered=false;
+  $('spinStage').classList.add('hidden');
+  $('qstage').classList.remove('hidden');
+  $('q').textContent='❓ '+x[0];
+  $('fb').textContent='';
+  $('next').classList.add('hidden');
+  $('opts').innerHTML='';
+
+  // Randomize all four options while keeping the correct answer attached to its text.
+  let options=x[1].map((text,i)=>({text:text,correct:i===x[2]}));
+  for(let i=options.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [options[i],options[j]]=[options[j],options[i]];
+  }
+  currentQuestion={text:x[0],options:options};
+  options.forEach((o,i)=>{
+    let b=document.createElement('button');
+    b.className='opt';
+    b.textContent=String.fromCharCode(65+i)+'. '+o.text;
+    b.onclick=()=>answer(i,b);
+    $('opts').appendChild(b);
+  });
+
+  tl=+$('secs').value||30;
+  $('timer').textContent='⏱ '+tl;
+  voice('अब प्रश्न है। '+x[0]);
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    tl--;
+    $('timer').textContent='⏱ '+tl;
+    if(tl<=0){
+      clearInterval(timer);
+      if(!answered)answer(-1);
+    }
+  },1000);
+}
+function answer(i,b){
+  if(answered)return;
+  answered=true;
+  clearInterval(timer);
+  let k=cur.name+'|'+cur.roll;
+  let r=rec[k];
+  let correctIndex=currentQuestion.options.findIndex(o=>o.correct);
+
+  document.querySelectorAll('.opt').forEach((z,j)=>{
+    if(j==correctIndex)z.classList.add('correct');
+  });
+
+  if(i==correctIndex){
+    r.score++;
+    r.correct++;
+    $('fb').textContent='✅ सही उत्तर! +1 अंक';
+  }else{
+    r.wrong++;
+    $('fb').textContent=i<0?'⏰ समय समाप्त!':'❌ गलत उत्तर';
+    if(b)b.classList.add('wrong');
+  }
+
+  $('score').textContent=Object.values(rec).reduce((a,z)=>a+z.score,0);
+  $('next').classList.remove('hidden');
+  voice(i==correctIndex?'सही उत्तर।':'सही उत्तर है: '+currentQuestion.options[correctIndex].text);
+}
+function next(){idx++;if(idx>=S.length)return finish();showSpin()}
+function finish(){clearInterval(timer);speechSynthesis?.cancel();$('game').classList.add('hidden');$('result').classList.remove('hidden');let a=Object.values(rec).sort((x,y)=>y.score-x.score||y.correct-x.correct||String(x.name).localeCompare(String(y.name),'hi'));$('sum').textContent=S.length+' students • '+S.length+' questions • Maximum '+S.length+' marks';$('body').innerHTML=a.map((x,i)=>'<tr><td>'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</td><td>'+safe(x.name)+'</td><td>'+safe(x.roll)+'</td><td><b>'+x.score+'</b></td><td>'+x.correct+'</td><td>'+x.wrong+'</td></tr>').join('')}
+function safe(x){return String(x).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+</script></body></html>
